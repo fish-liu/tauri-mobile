@@ -16,21 +16,17 @@ jobs:
                 # platform: [macos-latest,ubuntu-20.04,windows-latest]
                 include:
                   - platform: 'macos-latest'
-                    target: 'aarch64-apple-darwin'
                     args: '--target aarch64-apple-darwin'
                   - platform: 'macos-latest'
-                    target: 'x86_64-apple-darwin'
                     args: '--target x86_64-apple-darwin'
                   - platform: 'ubuntu-22.04'
-                    target: 'x86_64-unknow-linux-gnu'
                     args: ''
+                  #- platform: 'windows-latest'
+                  #  args: '--target x86_64-pc-windows-msvc'
                   - platform: 'windows-latest'
-                    target: 'x86_64-pc-windows-msvc'
-                    args: '--target x86_64-pc-windows-msvc'
-                  - platform: 'windows-latest'
-                    target: 'i686-pc-windows-msvc'
-                  - platform: 'windows-latest'
-                    target: 'aarch64-pc-windows-msvc'
+                    args: ''
+                  #- platform: 'windows-latest'
+                  #  target: 'aarch64-pc-windows-msvc'
 
 
         runs-on: ${{matrix.platform}}
@@ -89,8 +85,8 @@ jobs:
               uses: tauri-apps/tauri-action@v0.3
               env:
                   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-                  TAURI_PRIVATE_KEY: ${{secrets.TAURI_PRIVATE_KEY}}
-                  TAURI_KEY_PASSWORD: ${{secrets.TAURI_KEY_PASSWORD}}
+                  # TAURI_PRIVATE_KEY: ${{secrets.TAURI_PRIVATE_KEY}}
+                  # TAURI_KEY_PASSWORD: ${{secrets.TAURI_KEY_PASSWORD}}
               with:
                 tagName: ${{github.ref_name}}
                 releaseName: 'App Name v__VERSION__' #自定义release名称， __VERSION__将自动填写为版本信息
