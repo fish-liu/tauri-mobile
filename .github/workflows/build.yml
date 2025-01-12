@@ -14,15 +14,15 @@ jobs:
             matrix:
                 # 选择编译平台
                 # platform: [macos-latest,ubuntu-20.04,windows-latest]
-                include:
+                settings:
                   - platform: 'macos-latest'
                     args: '--target x86_64-apple-darwin'
                     target: "macos-intel"
                   - platform: 'macos-latest'
                     args: '--target aarch64-apple-darwin'
                     target: "macos-arm"
-                  - platform: 'ubuntu-22.04'
-                    args: ''
+                  #- platform: 'ubuntu-22.04'
+                  #  args: ''
                   #- platform: 'windows-latest'
                   #  args: '--target x86_64-pc-windows-msvc'
                   - platform: 'windows-latest'
@@ -32,51 +32,64 @@ jobs:
                   #  target: 'aarch64-pc-windows-msvc'
 
 
-        runs-on: ${{matrix.platform}}
+        runs-on: ${{matrix.settings.platform}}
         steps:
+            # 检出存储库
             - name: Checkout repository
               uses: actions/checkout@v4
            
-            # 安装node
-            - name: setup node 
-              uses: actions/setup-node@v4
-              with:
-                node-version: 23.3.0
-
-            - name: setup pnpm
-              uses: pnpm/action-setup@v2
-              with:
-                version: 9.15.0
-
+            # 设置 rust 环境
             - name: Rust setup
               uses: dtolnay/rust-toolchain@stable
-              with:
-                targets: ${{matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || ''}}
+              # with:
+              #  targets: ${{matrix.settings.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || ''}}
             
             - name: Install dependencies (ubuntu only)
-              if: matrix.platform == 'ubuntu-22.04'
+              if: matrix.settings.platform == 'ubuntu-22.04'
               run: |
                 sudo apt-get update
                 sudo apt-get install -y libwebkit2gtk-4.0-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
+            - name: Add Rust targets(macOS Intel)
+              if: matrix.settings.target == 'macos-intel'
+              run: rustup target add x86_64-apple-darwin
+
+            - name: Add Rust targets(macOS ARM)
+              if: matrix.settings.target == 'macos-arm'
+              run: rustup target add aarch64-apple-darwin    
+
+            # rust 缓存
             - name: Rust cache
               uses: swatinem/rust-cache@v2
               with:
                 workspaces: './src-tauri -> target'
 
+            # 设置 node 环境
+            - name: setup node 
+              uses: actions/setup-node@v4
+              with:
+                node-version: 'lts/*'
+
+            # 安装pnpm    
+            - name: setup pnpm
+              uses: pnpm/action-setup@v2
+              
+            # 安装前端依赖  
             - name: install frontend dependencies
               run: pnpm install  
 
-            - name: Build app
+            # 构建应用
+            - name: Build the app
               uses: tauri-apps/tauri-action@v0.3
               env:
                   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
                   # TAURI_PRIVATE_KEY: ${{secrets.TAURI_PRIVATE_KEY}}
                   # TAURI_KEY_PASSWORD: ${{secrets.TAURI_KEY_PASSWORD}}
               with:
+                args: ${{matrix.settings.args}} 
                 tagName: ${{github.ref_name}}
-                releaseName: 'App v__VERSION__' #自定义release名称， __VERSION__将自动填写为版本信息
+                releaseName: 'App-v__VERSION__' #自定义release名称， __VERSION__将自动填写为版本信息
                 releaseBody: 'See the assets to download and install this version'
                 releaseDraft: true 
                 prerelease: false
-                args: ${{matrix.args}} 
+                
