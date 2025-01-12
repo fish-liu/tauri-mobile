@@ -16,7 +16,7 @@ jobs:
                 # platform: [macos-latest,ubuntu-20.04,windows-latest]
                 include:
                   - platform: 'macos-latest'
-                    args: '---target x86_64-apple-darwin'
+                    args: '--target x86_64-apple-darwin'
                     target: "macos-intel"
                   - platform: 'macos-latest'
                     args: '--target aarch64-apple-darwin'
@@ -67,14 +67,14 @@ jobs:
               run: pnpm install  
 
             - name: Build app
-              uses: tauri-apps/tauri-action@v0
+              uses: tauri-apps/tauri-action@v0.3
               env:
                   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
                   # TAURI_PRIVATE_KEY: ${{secrets.TAURI_PRIVATE_KEY}}
                   # TAURI_KEY_PASSWORD: ${{secrets.TAURI_KEY_PASSWORD}}
               with:
                 tagName: ${{github.ref_name}}
-                releaseName: 'App Name v__VERSION__' #自定义release名称， __VERSION__将自动填写为版本信息
+                releaseName: 'App v__VERSION__' #自定义release名称， __VERSION__将自动填写为版本信息
                 releaseBody: 'See the assets to download and install this version'
                 releaseDraft: true 
                 prerelease: false
