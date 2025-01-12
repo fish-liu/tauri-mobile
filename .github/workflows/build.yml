@@ -36,7 +36,8 @@ jobs:
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
-
+           
+            # 安装node
             - name: setup node 
               uses: actions/setup-node@v4
               with:
