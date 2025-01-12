@@ -16,15 +16,18 @@ jobs:
                 # platform: [macos-latest,ubuntu-20.04,windows-latest]
                 include:
                   - platform: 'macos-latest'
-                    args: '--target aarch64-apple-darwin'
+                    args: '---target x86_64-apple-darwin'
+                    target: "macos-intel"
                   - platform: 'macos-latest'
-                    args: '--target x86_64-apple-darwin'
+                    args: '--target aarch64-apple-darwin'
+                    target: "macos-arm"
                   - platform: 'ubuntu-22.04'
                     args: ''
                   #- platform: 'windows-latest'
                   #  args: '--target x86_64-pc-windows-msvc'
                   - platform: 'windows-latest'
-                    args: ''
+                    args: "--verbose"
+                    target: "windows"
                   #- platform: 'windows-latest'
                   #  target: 'aarch64-pc-windows-msvc'
 
@@ -37,20 +40,12 @@ jobs:
             - name: setup node 
               uses: actions/setup-node@v4
               with:
-                node-version: 20
+                node-version: 23.3.0
 
-            - name: Install pnpm
+            - name: setup pnpm
               uses: pnpm/action-setup@v2
-              id: pnpm-install
               with:
-                version: 8
-                run_install: false
-
-            - name: Get pnpm store directory
-              id: pnpm-cache
-              shell: bash
-              run: |
-                  echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+                version: 9.15.0
 
             - name: Rust setup
               uses: dtolnay/rust-toolchain@stable
@@ -63,26 +58,16 @@ jobs:
                 sudo apt-get update
                 sudo apt-get install -y libwebkit2gtk-4.0-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
-                  
             - name: Rust cache
               uses: swatinem/rust-cache@v2
               with:
                 workspaces: './src-tauri -> target'
 
-            
-            - uses: actions/cache@v3
-              name: Setup pnpm cache
-              with:
-                path: ${{steps.pnpm-cache.outputs.STORE_PATH}}
-                key: ${{runner.os}}-pnpm-store-${{hashFiles('**/pnpm-lock.yaml')}}
-                restore-keys: |
-                    ${{runner.os}}-pnpm-store-
-
             - name: install frontend dependencies
-              run: pnpm install 
+              run: pnpm install  
 
-            - name: Tauri Action 
-              uses: tauri-apps/tauri-action@v0.3
+            - name: Build app
+              uses: tauri-apps/tauri-action@v0
               env:
                   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
                   # TAURI_PRIVATE_KEY: ${{secrets.TAURI_PRIVATE_KEY}}
