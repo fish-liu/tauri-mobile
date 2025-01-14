@@ -36,7 +36,8 @@ jobs:
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
-
+           
+            # 安装node
             - name: setup node 
               uses: actions/setup-node@v4
               with:
@@ -67,7 +68,7 @@ jobs:
               run: pnpm install  
 
             - name: Build app
-              uses: tauri-apps/tauri-action@v0.3
+              uses: tauri-apps/tauri-action@v0.5
               env:
                   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
                   # TAURI_PRIVATE_KEY: ${{secrets.TAURI_PRIVATE_KEY}}
